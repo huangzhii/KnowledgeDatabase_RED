@@ -62,7 +62,7 @@ function(input, output, session) {
                           export PATH=$HOME/vep/samtools/bin:$PATH &&
                           %s %s -i %s -o %s",
                           python, MafAnnotator, output.maf, OMAF),
-                  intern = T)
+                  intern = F)
     
     output$logs <- renderText({
       paste(log1, "\n", sep="")
