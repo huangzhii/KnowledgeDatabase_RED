@@ -12,21 +12,20 @@ options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase
 options(shiny.sanitize.errors = FALSE)
 options(stringsAsFactors = FALSE)
 
-home_dir = "/gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase"
-
 function(input, output, session) {
   observeEvent(input$action1,{
     smartModal(error=F, title = "Converting Uploaded Data", content = "Converting uploaded data, please wait for a little while...")
-    vep2maf.pl = paste0(home_dir, "/mskcc-vcf2maf-decbf60/vcf2maf.pl", sep="")
+    vep2maf.pl = "/gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/mskcc-vcf2maf-decbf60/vcf2maf.pl"
     input.vcf = input$vcf_file$datapath
-    ref.fasta = paste0(home_dir, "/.vep/homo_sapiens/86_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz", sep="")
+    vcf <<- read.table(input.vcf)
+    ref.fasta = "/gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/.vep/homo_sapiens/86_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz"
     md5 = digest(Sys.time(), "md5")
     output.maf <<- sprintf("tempstorage/output_%s.maf", md5)
     # oncoKB annotator
     OMAF <<- sprintf("tempstorage/output_%s.oncokb.txt", md5)
     python = "python"
-    MafAnnotator = paste0(home_dir, "/oncokb-annotator/MafAnnotator.py", sep="")
-    log1 = system(sprintf("export VEP_PATH=%s/vep &&
+    MafAnnotator = "/gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/oncokb-annotator/MafAnnotator.py"
+    log1 = system(sprintf("export VEP_PATH=$HOME/vep &&
                           export VEP_DATA=$HOME/.vep &&
                           export PERL5LIB=$VEP_PATH:$PERL5LIB &&
                           export PATH=$VEP_PATH/htslib:$PATH &&
@@ -40,7 +39,7 @@ function(input, output, session) {
                           export PATH=\"$PERL_BASE/perl-5.22.2/bin:$PATH\" &&
                           export PATH=$HOME/vep/samtools/bin:$PATH &&
                           perl %s --input-vcf %s --ref-fasta %s --output-maf %s",
-                          home_dir, vep2maf.pl, input.vcf, ref.fasta, output.maf),
+                          vep2maf.pl, input.vcf, ref.fasta, output.maf),
                   intern = T)
     
     # maf = read.table(output.maf, sep = "\t", header = T)
@@ -48,7 +47,7 @@ function(input, output, session) {
     # maf = select(maf, -CDS_position)
     # write.table(maf, file=output.maf, sep = "\t")
     
-    log2 = system(sprintf("export VEP_PATH=%s/vep &&
+    log2 = system(sprintf("export VEP_PATH=$HOME/vep &&
                           export VEP_DATA=$HOME/.vep &&
                           export PERL5LIB=$VEP_PATH:$PERL5LIB &&
                           export PATH=$VEP_PATH/htslib:$PATH &&
@@ -62,7 +61,7 @@ function(input, output, session) {
                           export PATH=\"$PERL_BASE/perl-5.22.2/bin:$PATH\" &&
                           export PATH=$HOME/vep/samtools/bin:$PATH &&
                           %s %s -i %s -o %s",
-                          home_dir, python, MafAnnotator, output.maf, OMAF),
+                          python, MafAnnotator, output.maf, OMAF),
                   intern = T)
     
     output$logs <- renderText({
@@ -85,7 +84,23 @@ function(input, output, session) {
       sendSweetAlert(session, title = "Error occured", "MAF file return 0 rows of information.", type = "error",
                      btn_labels = "Ok", html = FALSE, closeOnClickOutside = TRUE)
     } else{
-      fileoutput = oncokb.txt[, c("Hugo_Symbol","Variant_Classification","HGVSc","HGVSp_Short","BIOTYPE","IMPACT","oncogenic",
+      oncokb.txt$t_rate = oncokb.txt$t_alt_count/oncokb.txt$t_depth
+      
+      if (sum(!is.na(oncokb.txt$t_rate)) == 0){ # based on Mark data
+        # all t_depth and t_alt_count are missing
+        # use information from vcf file instead
+        Tumor_R_HT77_p0 = vcf[,11] # based on Mark data
+        Tumor_R_HT77_p0 = strsplit(Tumor_R_HT77_p0, ":")
+        for (i in 1:length(Tumor_R_HT77_p0)){
+          mutect_AD = Tumor_R_HT77_p0[[i]][2]
+          ref = as.numeric(strsplit(mutect_AD,",")[[1]][1])
+          alt = as.numeric(strsplit(mutect_AD,",")[[1]][2])
+          oncokb.txt$t_depth[i] = ref+alt
+          oncokb.txt$t_rate[i] = alt/(ref+alt)
+        }
+      }
+      fileoutput = oncokb.txt[, c("Hugo_Symbol","Variant_Classification","HGVSc","HGVSp_Short",
+                                  "t_depth", "t_rate", "BIOTYPE", "IMPACT", "oncogenic",
                                   "Highest_level") ]
       if(!is.null(oncokb.txt$drugs)){
         fileoutput$drugs = oncokb.txt$drugs
@@ -113,7 +128,7 @@ function(input, output, session) {
       
       # fileoutput$PUBMED = createPUBMEDLink(fileoutput$PUBMED)
       # fileoutput$PUBMED[is.na(oncokb.txt$PUBMED)] = ""
-      fileoutput <<- fileoutput
+      # fileoutput <<- fileoutput
       output$database_output <- DT::renderDataTable({
         fileoutput
       }, selection="none", escape = F, options=list(searching=T, pageLength = 100, ordering=T,
@@ -143,3 +158,4 @@ function(input, output, session) {
       write.table(fileoutput, file, row.names=TRUE, sep = "\t", quote = F)
     })
 }
+
