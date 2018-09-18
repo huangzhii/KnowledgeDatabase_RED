@@ -1,4 +1,9 @@
 # Zhi Huang 08/23/2018
+
+list.of.packages <- c("data.table", "dplyr", "tidyr", "digest", "DT", "jsonlite", "shinyWidgets")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
 library(data.table)
 library(dplyr)
 library(tidyr)

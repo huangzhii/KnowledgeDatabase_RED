@@ -1,0 +1,20 @@
+
+Do:
+
+chmod -R 711 /gpfs/home/z/h/zhihuan/
+
+Or:
+
+chmod 711 /gpfs/home/z/h/zhihuan/
+chmod 711 /gpfs/home/z/h/zhihuan/Carbonate/
+chmod 711 /gpfs/home/z/h/zhihuan/Carbonate/Desktop/
+chmod -R 711 /gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/
+
+
+After that, verify the folder permission by
+
+ls -l
+
+Then grant the read permission recursively:
+
+chmod -R 755 /gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/
