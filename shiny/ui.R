@@ -1,5 +1,5 @@
 # Zhi Huang 08/23/2018
-library(shinyWidgets)
+#library(shinyWidgets)
 navbarPage(title=div(a(img(src="images/logo.png",
                            "oncoKB webtool",
                            height = 28,

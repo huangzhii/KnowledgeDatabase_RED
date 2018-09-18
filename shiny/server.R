@@ -5,7 +5,7 @@ library(tidyr)
 library(digest)
 library(DT)
 library(jsonlite)
-library(shinyWidgets)
+#library(shinyWidgets)
 source("utils.R")
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
@@ -20,6 +20,9 @@ function(input, output, session) {
     vcf <<- read.table(input.vcf)
     ref.fasta = "/gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/.vep/homo_sapiens/86_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz"
     md5 = digest(Sys.time(), "md5")
+    if (!file.exists('tempstorage')){
+        dir.create(file.path('tempstorage'))
+    }
     output.maf <<- sprintf("tempstorage/output_%s.maf", md5)
     # oncoKB annotator
     OMAF <<- sprintf("tempstorage/output_%s.oncokb.txt", md5)
@@ -128,7 +131,7 @@ function(input, output, session) {
       
       # fileoutput$PUBMED = createPUBMEDLink(fileoutput$PUBMED)
       # fileoutput$PUBMED[is.na(oncokb.txt$PUBMED)] = ""
-      # fileoutput <<- fileoutput
+      fileoutput <<- fileoutput
       output$database_output <- DT::renderDataTable({
         fileoutput
       }, selection="none", escape = F, options=list(searching=T, pageLength = 100, ordering=T,
