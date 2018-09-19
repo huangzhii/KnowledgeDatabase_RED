@@ -20,3 +20,4 @@ bash shiny/install_essential.sh
 ```console
 bash shiny/runapp.sh
 ```
+A test data user could apply is ```shiny/www/data/test.vcf```.
