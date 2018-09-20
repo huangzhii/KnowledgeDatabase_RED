@@ -18,6 +18,7 @@ bash shiny/install_essential.sh
 
 ## 4. Run the application:
 ```console
-bash shiny/runapp.sh
+cd shiny/
+bash runapp.sh
 ```
 A test data user could apply is ```shiny/www/data/test.vcf```.
