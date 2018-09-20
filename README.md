@@ -8,17 +8,16 @@ git clone https://github.com/huangzhii/KnowledgeDatabase_RED.git
 
 ## 2. Open the project folder:
 ```console
-cd KnowledgeDatabase_RED
+cd KnowledgeDatabase_RED/shiny/
 ```
 
 ## 3. Install essential R packages (this could take several minutes):
 ```console
-bash shiny/install_essential.sh
+bash install_essential.sh
 ```
 
 ## 4. Run the application:
 ```console
-cd shiny/
 bash runapp.sh
 ```
 A test data user could apply is ```shiny/www/data/test.vcf```.
