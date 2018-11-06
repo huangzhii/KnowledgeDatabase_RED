@@ -5,16 +5,84 @@ library(tidyr)
 library(digest)
 library(DT)
 library(jsonlite)
-library(shinyWidgets)
+library(XML)
+library(plyr)
+library(rowr)
+# library(shinyWidgets)
 source("utils.R")
+source("foundationXMLparser2.R")
+# output <- foundationXMLparser('~/Desktop/shared_with_Jeremy/QRF024108.xml')
+# View(output[[3]])
+
 
 options(shiny.maxRequestSize=300*1024^2) # to the top of server.R would increase the limit to 300MB
 options(shiny.sanitize.errors = FALSE)
 options(stringsAsFactors = FALSE)
 
 function(input, output, session) {
+  #-------------------
+  #  Foundation Data
+  #-------------------
   observeEvent(input$action1,{
     smartModal(error=F, title = "Converting Uploaded Data", content = "Converting uploaded data, please wait for a little while...")
+    input.xml = input$xml_file$datapath
+    foundationRes <<- foundationXMLparser2(input.xml)
+    foundationRes[[5]]$PMID = sapply(foundationRes[[5]]$PMID, function(x) paste(createPUBMEDLink(x), sep="", collapse=""))
+    output$resultsUI <- renderUI({
+      tagList(
+        h4("Foundation Database Output", style="color: STEELBLUE; font-size: 22px"),
+        downloadButton("download_foundation_all", "Download all tables"),
+        tabsetPanel(
+          tabPanel("PMI", DT::dataTableOutput("foundation_output_1")),
+          tabPanel("Variants", DT::dataTableOutput("foundation_output_2")),
+          tabPanel("CNA", DT::dataTableOutput("foundation_output_3")),
+          tabPanel("SV", DT::dataTableOutput("foundation_output_4")),
+          tabPanel("References", DT::dataTableOutput("foundation_output_5")),
+          tabPanel("Gene list", DT::dataTableOutput("foundation_output_6"))
+        )
+      )
+    })
+    output$foundation_output_1 <- DT::renderDataTable({foundationRes[[1]]}, selection="none", escape = F,
+                                                  options=list(searching=T,pageLength = 100, ordering=T, autoWidth = TRUE, columnDefs = list(list(width = '100px', targets = "_all" ))))
+    
+    output$foundation_output_2 <- DT::renderDataTable({foundationRes[[2]]}, selection="none", escape = F,
+                                                  options=list(searching=T,pageLength = 100, ordering=T, autoWidth = TRUE, columnDefs = list(list(width = '100px', targets = "_all" ))))
+    
+    output$foundation_output_3 <- DT::renderDataTable({foundationRes[[3]]}, selection="none", escape = F,
+                                                  options=list(searching=T,pageLength = 100, ordering=T, autoWidth = TRUE, columnDefs = list(list(width = '100px', targets = "_all" ))))
+    
+    output$foundation_output_4 <- DT::renderDataTable({foundationRes[[4]]}, selection="none", escape = F,
+                                                  options=list(searching=T,pageLength = 100, ordering=T, autoWidth = TRUE, columnDefs = list(list(width = '100px', targets = "_all" ))))
+    
+    output$foundation_output_5 <- DT::renderDataTable({foundationRes[[5]]}, selection="none", escape = F,
+                                                  options=list(searching=T,pageLength = 100, ordering=T, autoWidth = TRUE, columnDefs = list(list(width = '100px', targets = "_all" ))))
+    
+    output$foundation_output_6 <- DT::renderDataTable({foundationRes[[6]]}, selection="none", escape = F,
+                                                  options=list(searching=T,pageLength = 100, ordering=T, autoWidth = TRUE, columnDefs = list(list(width = '100px', targets = "_all" ))))
+    
+    
+    
+    removeModal()
+    session$sendCustomMessage("buttonCallbackHandler", "tab2")
+      
+      
+  })
+  
+  #-------------------
+  #   Nantomic Data
+  #-------------------
+  observeEvent(input$action2,{
+    smartModal(error=F, title = "Converting Uploaded Data", content = "Converting uploaded data, please wait for a little while...")
+    
+    output$resultsUI <- renderUI({
+      tagList(
+        h4("NantOmics Database Output", style="color: STEELBLUE; font-size: 22px"),
+        downloadButton("download_MAF", "Download MAF data"),
+        downloadButton("download_oncokb_selected", "Download oncokb.txt (Selected)"),
+        downloadButton("download_oncokb_all", "Download oncokb.txt (All)"),
+        DT::dataTableOutput("database_output")
+      )
+    })
     vep2maf.pl = "/gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/mskcc-vcf2maf-decbf60/vcf2maf.pl"
     input.vcf = input$vcf_file$datapath
     vcf <<- read.table(input.vcf)
@@ -37,7 +105,8 @@ function(input, output, session) {
                           export PERL_BASE=\"$HOME/perl\" &&
                           export PERL5LIB=\"$PERL_BASE/perl-5.22.2/lib/perl5:$PERL_BASE/perl-5.22.2/lib/perl5/x86_64-linux:$PERL5LIB\" &&
                           export PATH=\"$PERL_BASE/perl-5.22.2/bin:$PATH\" &&
-                          export PATH=$HOME/vep/samtools/bin:$PATH &&
+                          #export PATH=$HOME/vep/samtools/bin:$PATH &&
+                          module load samtools &&
                           perl %s --input-vcf %s --ref-fasta %s --output-maf %s",
                           vep2maf.pl, input.vcf, ref.fasta, output.maf),
                   intern = T)
@@ -59,7 +128,8 @@ function(input, output, session) {
                           export PERL_BASE=\"$HOME/perl\" &&
                           export PERL5LIB=\"$PERL_BASE/perl-5.22.2/lib/perl5:$PERL_BASE/perl-5.22.2/lib/perl5/x86_64-linux:$PERL5LIB\" &&
                           export PATH=\"$PERL_BASE/perl-5.22.2/bin:$PATH\" &&
-                          export PATH=$HOME/vep/samtools/bin:$PATH &&
+                          #export PATH=$HOME/vep/samtools/bin:$PATH &&
+                          module load samtools &&
                           %s %s -i %s -o %s",
                           python, MafAnnotator, output.maf, OMAF),
                   intern = F)
@@ -128,20 +198,35 @@ function(input, output, session) {
       
       # fileoutput$PUBMED = createPUBMEDLink(fileoutput$PUBMED)
       # fileoutput$PUBMED[is.na(oncokb.txt$PUBMED)] = ""
-      # fileoutput <<- fileoutput
+      fileoutput <<- fileoutput
       output$database_output <- DT::renderDataTable({
         fileoutput
       }, selection="none", escape = F, options=list(searching=T, pageLength = 100, ordering=T,
                                                     autoWidth = TRUE,
                                                     columnDefs = list(list(width = '100px', targets = "_all" )))
       )#,extensions = 'Responsive')
-      
       session$sendCustomMessage("buttonCallbackHandler", "tab2")
       removeModal()
     }
   })
   
   # download
+  
+  output$download_foundation_all <- downloadHandler(
+    filename = 'Results_Foundation.zip',
+    content = function(fname) {
+      filenames = c("PMI", "Variants", "CNA", "SV", "References", "Gene list")
+      fs <- paste0(filenames, '.tsv')
+      for(i in 1:length(foundationRes)){
+        write.table(foundationRes[[i]], file = fs[i], sep = '\t', col.names = NA)
+        # print(fs[i])
+      }
+      zip(zipfile=fname, files=fs)
+      if(file.exists(paste0(fname, ".zip"))) {file.rename(paste0(fname, ".zip"), fname)}
+    },
+    contentType = "application/zip"
+  )
+  
   output$download_MAF <- downloadHandler(
     filename = function() { "output.maf" },
     content = function(file) {

@@ -1,5 +1,5 @@
 # Zhi Huang 08/23/2018
-library(shinyWidgets)
+# library(shinyWidgets)
 navbarPage(title=div(a(img(src="images/logo.png",
                            "oncoKB webtool",
                            height = 28,
@@ -8,22 +8,46 @@ navbarPage(title=div(a(img(src="images/logo.png",
                     sidebarLayout(
                       position = "left",
                       sidebarPanel(width = 3,
-                                   h4("File Uploader", style="color: STEELBLUE"),
-                                   fileInput("vcf_file", "VCF file",
-                                             multiple = FALSE,
-                                             accept = c("text/csv",
-                                                        "text/comma-separated-values,text/plain",
-                                                        ".csv", ".vcf")),
-                                   
-                                   # Include clarifying text ----
-                                   helpText("Note: Maximum file size allowed for uploading is 300MB."),
-                                   # Horizontal line ----
-                                   tags$hr(),
-                                   p('If you want a sample .vcf file to upload,',
-                                     'you can first download the sample',
-                                     a(href = 'data/test.vcf', 'test.vcf'),
-                                     'file, and then try uploading them.'),
-                                   actionButton("action1", "Confirm when Complete")
+                                   tabsetPanel(
+                                     tabPanel("Foundation Medicine",
+                                              h4("File Uploader", style="color: STEELBLUE"),
+                                              fileInput("xml_file", "XML file",
+                                                        multiple = FALSE,
+                                                        accept = c("text/csv",
+                                                                   "text/comma-separated-values,text/plain",
+                                                                   ".csv", ".vcf")),
+                                              # Horizontal line ----
+                                              tags$hr(),
+                                              p('If you want a sample .vcf file to upload,',
+                                                'you can first download the sample',
+                                                a(href = 'data/test.vcf', 'test.vcf'),
+                                                'file, and then try uploading them.'),
+                                              actionButton("action1", "Confirm when Complete")
+                                     ),
+                                     tabPanel("NantOmics",
+                                              h4("File Uploader", style="color: STEELBLUE"),
+                                              fileInput("vcf_file", "VCF file",
+                                                        multiple = FALSE,
+                                                        accept = c("text/csv",
+                                                                   "text/comma-separated-values,text/plain",
+                                                                   ".csv", ".vcf")),
+                                              fileInput("xlsx_file", "XLSX sheet (NANT Results) (optional)",
+                                                        multiple = FALSE,
+                                                        accept = c("text/csv",
+                                                                   "text/comma-separated-values,text/plain",
+                                                                   ".csv", ".vcf")),
+                                              
+                                              # Include clarifying text ----
+                                              helpText("Note: NANT Results is the XLSX file contains the result from NantOmics."),
+                                              # Horizontal line ----
+                                              tags$hr(),
+                                              p('If you want a sample .vcf file to upload,',
+                                                'you can first download the sample',
+                                                a(href = 'data/test.vcf', 'test.vcf'),
+                                                'file, and then try uploading them.'),
+                                              actionButton("action2", "Confirm when Complete")
+                                     )
+                                   )
                       ),
                       mainPanel(
                         tabsetPanel(
@@ -32,12 +56,7 @@ navbarPage(title=div(a(img(src="images/logo.png",
                                    HTML('<p> <br> This application was developed to help clinical physicians to get oncoKB information from VCF files.</p>')
                           ),
                           tabPanel("Results",
-                                   h4("Database Output", style="color: STEELBLUE; font-size: 22px"),
-                                   downloadButton("download_MAF", "Download MAF data"),
-                                   downloadButton("download_oncokb_selected", "Download oncokb.txt (Selected)"),
-                                   downloadButton("download_oncokb_all", "Download oncokb.txt (All)"),
-                                   
-                                   DT::dataTableOutput("database_output"),
+                                   uiOutput("resultsUI"),
                                    
                                    tags$head(
                                      tags$script(HTML("(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -46,7 +65,7 @@ navbarPage(title=div(a(img(src="images/logo.png",
                                                       
                                                       ga('create', 'UA-113406500-2', 'auto');
                                                       ga('send', 'pageview');"))
-                                     ),
+                                   ),
                                    tags$head(tags$script('Shiny.addCustomMessageHandler("buttonCallbackHandler",
                                                          function(typeMessage) {console.log(typeMessage)
                                                          if(typeMessage == "tab2"){

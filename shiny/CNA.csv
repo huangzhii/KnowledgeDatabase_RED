@@ -1,0 +1,6 @@
+"","PMI.reportId","SampleId","variant.sample.bait.set","variant.sample.mean.exon.depth","variant.sample.name","variant.sample.nucleic.acid.type","variant.qualitycontrol","CNA.dna.evidence","copy.number","equivocal","gene","number.of.exons","position","ratio","status","type"
+"1","QRF024108","QRF024108.01","DX1","846.98","SA-123916","DNA","Pass","SA-123916","8","false","WHSC1L1","23 of 23","chr8:38133159-38205689","1.65","known","amplification"
+"2","QRF024108","QRF024108.01","DX1","846.98","SA-123916","DNA","Pass","SA-123916","8","false","AKT2","13 of 13","chr19:40723714-40791492","1.82","known","amplification"
+"3","QRF024108","QRF024108.01","DX1","846.98","SA-123916","DNA","Pass","SA-123916","25","false","CD274","7 of 7","chr9:5456074-5470632","3.92","known","amplification"
+"4","QRF024108","QRF024108.01","DX1","846.98","SA-123916","DNA","Pass","SA-123916","8","false","ZNF703","2 of 2","chr8:37553497-37556192","1.99","known","amplification"
+"5","QRF024108","QRF024108.01","DX1","846.98","SA-123916","DNA","Pass","SA-123916","25","false","PDCD1LG2","6 of 6","chr9:5522509-5570021","3.81","known","amplification"

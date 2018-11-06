@@ -1,0 +1,2 @@
+"","PMI.reportId","SampleId","variant.sample.bait.set","variant.sample.mean.exon.depth","variant.sample.name","variant.sample.nucleic.acid.type","variant.qualitycontrol","rearrangement.dna.evidence","description","equivocal","in.frame","other.gene","pos1","pos2","status","supporting.read.pairs","targeted.gene","type"
+"1","QRF024108","QRF024108.01","DX1","846.98","SA-123916","DNA","Pass","SA-123916","NF1(NM_000267) rearrangement exon 52","false","unknown","N/A","chr17:29684015-29684231","chr17:25983449-25983718","likely","82","NF1","truncation"
