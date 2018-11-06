@@ -5,10 +5,14 @@ library(tidyr)
 library(digest)
 library(DT)
 library(jsonlite)
+<<<<<<< HEAD
 library(XML)
 library(plyr)
 library(rowr)
 # library(shinyWidgets)
+=======
+#library(shinyWidgets)
+>>>>>>> 181274d618d6caa134a9fbb0ec4a7fa5c742bc6c
 source("utils.R")
 source("foundationXMLparser2.R")
 # output <- foundationXMLparser('~/Desktop/shared_with_Jeremy/QRF024108.xml')
@@ -88,6 +92,9 @@ function(input, output, session) {
     vcf <<- read.table(input.vcf)
     ref.fasta = "/gpfs/home/z/h/zhihuan/Carbonate/Desktop/KnowledgeDatabase/.vep/homo_sapiens/86_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa.gz"
     md5 = digest(Sys.time(), "md5")
+    if (!file.exists('tempstorage')){
+        dir.create(file.path('tempstorage'))
+    }
     output.maf <<- sprintf("tempstorage/output_%s.maf", md5)
     # oncoKB annotator
     OMAF <<- sprintf("tempstorage/output_%s.oncokb.txt", md5)
