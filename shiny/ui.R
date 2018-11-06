@@ -1,9 +1,5 @@
 # Zhi Huang 08/23/2018
-<<<<<<< HEAD
 # library(shinyWidgets)
-=======
-#library(shinyWidgets)
->>>>>>> 181274d618d6caa134a9fbb0ec4a7fa5c742bc6c
 navbarPage(title=div(a(img(src="images/logo.png",
                            "oncoKB webtool",
                            height = 28,
